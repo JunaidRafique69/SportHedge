@@ -66,7 +66,7 @@ class MatchingEngine:
         self.stocks = {"TATA": Stock("TATA"), "RELIANCE": Stock("RELIANCE")}
 
     def add_order(self, stock_name, order_type, price, quantity):
-        """Adds a buy or sell order to the specified stock.
+        """Adds a buy or sell order to the specified stock and matches orders if possible.
 
         Args:
             stock_name (str): The name of the stock (TATA or RELIANCE).
@@ -84,30 +84,52 @@ class MatchingEngine:
 
         order = Order(price, quantity, order_type)
         stock = self.stocks[stock_name]
-        stock.add_order(order)
-        self.match_orders(stock_name)
+        if order_type == 'sell':
+            self.match_sell_order(stock, order)
+        elif order_type == 'buy':
+            self.match_buy_order(stock, order)
 
-    def match_orders(self, stock_name):
-        """Matches buy and sell orders for the given stock based on price.
+    def match_sell_order(self, stock, sell_order):
+        """Matches a sell order with buy orders and updates the buy orders list accordingly.
 
         Args:
-            stock_name (str): The name of the stock (TATA or RELIANCE).
+            stock (Stock): The stock object.
+            sell_order (Order): The sell order to be matched.
         """
-        stock = self.stocks[stock_name]
-        while stock.buy_orders and stock.sell_orders:
-            buy_order = stock.buy_orders[0]
-            sell_order = stock.sell_orders[0]
-            if buy_order.price >= sell_order.price:
+        # Iterate through buy orders and find matches
+        for buy_order in stock.buy_orders:
+            if buy_order.price >= sell_order.price and buy_order.quantity > 0 and sell_order.quantity > 0:
                 matched_quantity = min(buy_order.quantity, sell_order.quantity)
-                print(f"Matched {matched_quantity} shares of {stock_name} at price {sell_order.price}")
+                print(f"Matched {matched_quantity} shares at price {buy_order.price}")
                 buy_order.quantity -= matched_quantity
                 sell_order.quantity -= matched_quantity
                 if buy_order.quantity == 0:
-                    stock.buy_orders.pop(0)
+                    stock.buy_orders.remove(buy_order)
                 if sell_order.quantity == 0:
-                    stock.sell_orders.pop(0)
-            else:
-                break
+                    return  # Sell order fulfilled
+        # If the sell order is not fulfilled, add it to the sell orders list
+        stock.sell_orders.append(sell_order)
+
+    def match_buy_order(self, stock, buy_order):
+        """Matches a buy order with sell orders and updates the sell orders list accordingly.
+
+        Args:
+            stock (Stock): The stock object.
+            buy_order (Order): The buy order to be matched.
+        """
+        # Iterate through sell orders and find matches
+        for sell_order in stock.sell_orders:
+            if sell_order.price <= buy_order.price and buy_order.quantity > 0 and sell_order.quantity > 0:
+                matched_quantity = min(buy_order.quantity, sell_order.quantity)
+                print(f"Matched {matched_quantity} shares at price {sell_order.price}")
+                buy_order.quantity -= matched_quantity
+                sell_order.quantity -= matched_quantity
+                if sell_order.quantity == 0:
+                    stock.sell_orders.remove(sell_order)
+                if buy_order.quantity == 0:
+                    return  # Buy order fulfilled
+        # If the buy order is not fulfilled, add it to the buy orders list
+        stock.buy_orders.append(buy_order)
 
     def display_order_book(self, stock_name):
         """Displays the order book for the specified stock.
@@ -128,8 +150,11 @@ matching_engine = MatchingEngine()
 # Adding sample buy and sell orders
 matching_engine.add_order("TATA", "buy", 155, 5)
 matching_engine.add_order("TATA", "sell", 160, 7)
+matching_engine.add_order("TATA", "sell", 155, 5)
+matching_engine.add_order("TATA", "buy", 160, 7)
 matching_engine.add_order("RELIANCE", "sell", 200, 10)
 matching_engine.add_order("RELIANCE", "buy", 190, 8)
+matching_engine.add_order("RELIANCE", "sell", 190, 7)
 
 # Display order books
 matching_engine.display_order_book("TATA")
