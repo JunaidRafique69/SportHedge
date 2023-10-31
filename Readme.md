@@ -1,45 +1,49 @@
 # Stock Matching Engine
 
-This project implements a simple matching engine for stock trading. The engine matches buy and sell orders for two types of stocks: TATA and RELIANCE based on the quoted prices.
+The Stock Matching Engine is a Python application that simulates a basic stock exchange. It allows users to place buy and sell orders for two stocks: TATA and RELIANCE. The matching engine matches buy and sell orders based on price and quantity, executing trades when there is a match.
 
-## Classes
+## Prerequisites
 
-### Stock
-- Represents a stock with its buy and sell orders.
-- Methods:
-  - `add_order(order)`: Adds a buy or sell order to the stock.
+- Python 3.x
 
-### Order
-- Represents a buy or sell order with a specific price and quantity.
-- Attributes:
-  - `price`: Price of the order.
-  - `quantity`: Quantity of shares in the order.
-  - `order_type`: Type of the order ('buy' or 'sell').
+## Installation
 
-### MatchingEngine
-- Implements the logic to match buy and sell orders for different stocks.
-- Methods:
-  - `add_order(stock_name, order_type, price, quantity)`: Adds a buy or sell order to the specified stock.
-  - `match_orders(stock_name)`: Matches buy and sell orders for the given stock.
-  - `display_order_book(stock_name)`: Displays the order book for the specified stock.
-
+1. **Clone the repository:**
+https://github.com/JunaidRafique69/SportHedge
+2. **Navigate to the project directory:**
+cd SportHedge
+3. 
 ## Usage
 
-1. Install the required packages: `pip install -r requirements.txt`
-2. Run the matching engine script: `python matching_engine.py`
+To run the matching engine, use the following command:
+
+python main.py
+
+## How It Works
+
+### Matching Logic
+
+- **Buy Orders**: When a buy order is added, the system attempts to match it with existing sell orders. If a match is found (based on price and quantity), a trade is executed, and the sell order(s) are updated or removed.
+  
+- **Sell Orders**: When a sell order is added, the system attempts to match it with existing buy orders. If a match is found (based on price and quantity), a trade is executed, and the buy order(s) are updated or removed.
+
+- **Partial Fills**: The system handles partial fills by combining multiple orders to fulfill the trade when a perfect match is not found.
+
+### Order Matching Process
+
+1. **Buy Order Addition**: When a buy order is added, the matching engine checks existing sell orders for a match. If no perfect match is found, the engine combines multiple sell orders to fulfill the trade. If a partial or complete match occurs, the trade is executed.
+
+2. **Sell Order Addition**: When a sell order is added, the matching engine checks existing buy orders for a match. If no perfect match is found, the engine combines multiple buy orders to fulfill the trade. If a partial or complete match occurs, the trade is executed.
 
 ## Sample Usage
 
 ```python
-# Sample usage of the matching engine
 matching_engine = MatchingEngine()
 
 # Adding sample buy and sell orders
-matching_engine.add_order("TATA", "buy", 155, 5)
-matching_engine.add_order("TATA", "sell", 160, 7)
-matching_engine.add_order("RELIANCE", "sell", 200, 10)
-matching_engine.add_order("RELIANCE", "buy", 190, 8)
+matching_engine.add_order("TATA", "buy", 70, 7)
+matching_engine.add_order("TATA", "sell", 60, 6)
+matching_engine.add_order("TATA", "sell", 20, 2)
 
 # Display order books
 matching_engine.display_order_book("TATA")
-matching_engine.display_order_book("RELIANCE")
